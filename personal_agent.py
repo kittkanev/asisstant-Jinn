@@ -583,7 +583,7 @@ class AppLauncher:
                 if program_files_x86 is not None
                 else None,
             )
-            candidates = {
+            windows_candidates = {
                 "vscode": tuple(path for path in vscode_paths if path is not None),
                 "telegram": (
                     (roaming / "Telegram Desktop" / "Telegram.exe",)
@@ -601,8 +601,8 @@ class AppLauncher:
                     else ()
                 ),
             }
-            executable = self._first_existing(candidates.get(alias, ()))
-            return [executable] if executable else None
+            windows_executable = self._first_existing(windows_candidates.get(alias, ()))
+            return [windows_executable] if windows_executable else None
         if system == "Darwin":
             applications = {
                 "files": ("Finder", Path("/System/Library/CoreServices/Finder.app")),
@@ -1475,13 +1475,15 @@ class PersonalAgent:
                     "Укажите длительность таймера, например «на 10 минут»."
                 )
             seconds, duration_fragment = parsed_duration
+            timer_verb_match = re.search(
+                r"(?:поставь|установи|запусти|создай)?\s*таймер",
+                original,
+                re.IGNORECASE,
+            )
+            timer_verb = timer_verb_match.group(0) if timer_verb_match else "таймер"
             label = self._strip_command_parts(
                 original,
-                re.search(
-                    r"(?:поставь|установи|запусти|создай)?\s*таймер",
-                    original,
-                    re.IGNORECASE,
-                ).group(0),
+                timer_verb,
                 duration_fragment,
             )
             label = re.sub(r"^(?:(?:на|для)\s+)+", "", label, flags=re.IGNORECASE)
