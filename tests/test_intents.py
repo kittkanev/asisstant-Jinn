@@ -9,7 +9,7 @@ from github_service.intents import IntentParser
 class FakeCompletions:
     def __init__(self, content: str):
         self.content = content
-        self.calls = []
+        self.calls: list[dict] = []
 
     def create(self, **kwargs):
         self.calls.append(kwargs)

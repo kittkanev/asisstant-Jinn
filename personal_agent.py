@@ -601,8 +601,8 @@ class AppLauncher:
                     else ()
                 ),
             }
-            executable = self._first_existing(candidates.get(alias, ()))
-            return [executable] if executable else None
+            exec_path = self._first_existing(candidates.get(alias, ()))
+            return [str(exec_path)] if exec_path else None
         if system == "Darwin":
             applications = {
                 "files": ("Finder", Path("/System/Library/CoreServices/Finder.app")),
@@ -627,7 +627,7 @@ class AppLauncher:
                 return None
             return ["open", "-a", definition[0]]
 
-        candidates = {
+        candidates_linux: dict[str, tuple[str, ...]] = {
             "files": ("xdg-open",),
             "terminal": ("x-terminal-emulator", "gnome-terminal", "konsole", "xterm"),
             "calculator": ("gnome-calculator", "kcalc", "galculator"),
@@ -636,7 +636,7 @@ class AppLauncher:
             "telegram": ("telegram-desktop", "telegram"),
             "discord": ("discord",),
         }
-        command = self._first_available(candidates.get(alias, ()))
+        command = self._first_available(candidates_linux.get(alias, ()))
         if not command:
             return None
         return [command, home] if alias == "files" else [command]
@@ -1477,11 +1477,15 @@ class PersonalAgent:
             seconds, duration_fragment = parsed_duration
             label = self._strip_command_parts(
                 original,
-                re.search(
-                    r"(?:поставь|установи|запусти|создай)?\s*таймер",
-                    original,
-                    re.IGNORECASE,
-                ).group(0),
+                m.group(0)
+                if (
+                    m := re.search(
+                        r"(?:поставь|установи|запусти|создай)?\s*таймер",
+                        original,
+                        re.IGNORECASE,
+                    )
+                )
+                else "",
                 duration_fragment,
             )
             label = re.sub(r"^(?:(?:на|для)\s+)+", "", label, flags=re.IGNORECASE)
