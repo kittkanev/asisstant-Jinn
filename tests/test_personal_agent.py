@@ -30,10 +30,13 @@ class PersonalAgentTests(unittest.TestCase):
         self.tempdir = tempfile.TemporaryDirectory()
         self.database = Path(self.tempdir.name) / "private" / "agent.db"
         self.notifier = FakeNotifier()
+        from typing import cast
+        from personal_agent import DesktopNotifier
+
         self.agent = PersonalAgent(
             self.database,
             start_scheduler=False,
-            notifier=self.notifier,
+            notifier=cast(DesktopNotifier, self.notifier),
         )
 
     def tearDown(self) -> None:

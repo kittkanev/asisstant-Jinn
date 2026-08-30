@@ -535,8 +535,8 @@ class AppLauncher:
         return None
 
     @staticmethod
-    def _first_existing(paths: tuple[Path, ...]) -> str | None:
-        return next((str(path) for path in paths if path.is_file()), None)
+    def _first_existing(paths: tuple[str, ...]) -> str | None:
+        return next((str(path) for path in paths if Path(path).is_file()), None)
 
     @staticmethod
     def _environment_root(name: str, fallback: str = "") -> Path | None:
@@ -584,15 +584,16 @@ class AppLauncher:
                 else None,
             )
             candidates = {
-                "vscode": tuple(path for path in vscode_paths if path is not None),
+                "vscode": tuple(str(path) for path in vscode_paths if path is not None),
                 "telegram": (
-                    (roaming / "Telegram Desktop" / "Telegram.exe",)
+                    (str(roaming / "Telegram Desktop" / "Telegram.exe"),)
                     if roaming is not None
                     else ()
                 ),
                 "discord": (
                     tuple(
-                        sorted(
+                        str(p)
+                        for p in sorted(
                             (local / "Discord").glob("app-*/Discord.exe"),
                             reverse=True,
                         )
@@ -601,29 +602,33 @@ class AppLauncher:
                     else ()
                 ),
             }
-            executable = self._first_existing(candidates.get(alias, ()))
-            return [executable] if executable else None
+            found_executable = self._first_existing(candidates.get(alias, ()))
+            return [found_executable] if found_executable else None
         if system == "Darwin":
             applications = {
-                "files": ("Finder", Path("/System/Library/CoreServices/Finder.app")),
+                "files": ("Finder", "/System/Library/CoreServices/Finder.app"),
                 "terminal": (
                     "Terminal",
-                    Path("/System/Applications/Utilities/Terminal.app"),
+                    "/System/Applications/Utilities/Terminal.app",
                 ),
                 "calculator": (
                     "Calculator",
-                    Path("/System/Applications/Calculator.app"),
+                    "/System/Applications/Calculator.app",
                 ),
-                "editor": ("TextEdit", Path("/System/Applications/TextEdit.app")),
+                "editor": ("TextEdit", "/System/Applications/TextEdit.app"),
                 "vscode": (
                     "Visual Studio Code",
-                    Path("/Applications/Visual Studio Code.app"),
+                    "/Applications/Visual Studio Code.app",
                 ),
-                "telegram": ("Telegram", Path("/Applications/Telegram.app")),
-                "discord": ("Discord", Path("/Applications/Discord.app")),
+                "telegram": ("Telegram", "/Applications/Telegram.app"),
+                "discord": ("Discord", "/Applications/Discord.app"),
             }
             definition = applications.get(alias)
-            if not definition or not definition[1].is_dir() or not shutil.which("open"):
+            if (
+                not definition
+                or not Path(definition[1]).is_dir()
+                or not shutil.which("open")
+            ):
                 return None
             return ["open", "-a", definition[0]]
 
@@ -1475,13 +1480,15 @@ class PersonalAgent:
                     "Укажите длительность таймера, например «на 10 минут»."
                 )
             seconds, duration_fragment = parsed_duration
+            timer_match = re.search(
+                r"(?:поставь|установи|запусти|создай)?\s*таймер",
+                original,
+                re.IGNORECASE,
+            )
+            timer_str = timer_match.group(0) if timer_match else "таймер"
             label = self._strip_command_parts(
                 original,
-                re.search(
-                    r"(?:поставь|установи|запусти|создай)?\s*таймер",
-                    original,
-                    re.IGNORECASE,
-                ).group(0),
+                timer_str,
                 duration_fragment,
             )
             label = re.sub(r"^(?:(?:на|для)\s+)+", "", label, flags=re.IGNORECASE)
