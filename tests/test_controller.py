@@ -39,9 +39,12 @@ class AssistantControllerTests(unittest.TestCase):
             start_scheduler=False,
         )
         self.conversation = FakeConversation()
+        from typing import cast
+        from conversation import ConversationService
+
         self.controller = AssistantController(
             personal_agent=self.personal,
-            conversation=self.conversation,
+            conversation=cast(ConversationService, self.conversation),
         )
 
     def tearDown(self) -> None:
