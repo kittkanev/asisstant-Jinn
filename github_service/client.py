@@ -59,8 +59,12 @@ class GitHubClient:
     def get_notifications(self) -> list[dict[str, Any]]:
         """Fetch up to five unread notifications from all repositories."""
 
+        assert self.g is not None
+        user = self.g.get_user()
+        assert user is not None
+
         notifications: list[dict[str, Any]] = []
-        items = self.g.get_user().get_notifications(all=False, participating=False)
+        items = user.get_notifications(all=False, participating=False)
         for notification in items:
             notifications.append(
                 {
