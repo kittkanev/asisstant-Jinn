@@ -238,7 +238,7 @@ class ConversationServiceTests(unittest.TestCase):
         self.assertEqual(sent_messages[0]["role"], "system")
         self.assertEqual(sent_messages[-1]["role"], "user")
 
-    def test_provider_or_language_change_does_not_share_history(self):
+    def test_provider_or_language_change_does_not_share_history(self) -> None:
         service = ConversationService()
         settings = [
             OPENAI_SETTINGS,
