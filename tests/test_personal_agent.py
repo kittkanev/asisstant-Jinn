@@ -16,7 +16,7 @@ from personal_agent import AgendaStore, AppLauncher, DesktopNotifier, PersonalAg
 UTC = timezone.utc
 
 
-class FakeNotifier:
+class FakeNotifier(DesktopNotifier):
     def __init__(self) -> None:
         self.messages: list[tuple[str, str]] = []
 
@@ -98,7 +98,7 @@ class PersonalAgentTests(unittest.TestCase):
         self.assertEqual(first[0]["item_id"], item["id"])
         self.assertEqual(self.notifier.messages, [("Таймер завершён", "Перерыв")])
 
-    def test_concurrent_due_collection_does_not_duplicate(self):
+    def test_concurrent_due_collection_does_not_duplicate(self) -> None:
         self.agent.store.create_item(
             "reminder",
             "Одно уведомление",

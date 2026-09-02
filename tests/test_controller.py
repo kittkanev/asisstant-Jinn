@@ -9,7 +9,9 @@ from gui_server import AssistantController
 from personal_agent import PersonalAgent
 
 
-class FakeConversation:
+from conversation import ConversationService
+
+class FakeConversation(ConversationService):
     def __init__(self) -> None:
         self.messages: list[str] = []
         self.languages: list[str] = []
