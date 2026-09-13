@@ -614,17 +614,20 @@ class Config:
         assignment = re.compile(r"^(\s*)(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=")
         for line in lines:
             match = assignment.match(line)
-            key = match.group(2) if match else None
-            if key in pending:
-                output.append(f"{key}={_quote_env(pending.pop(key))}")
-            elif key in requested_keys:
+            line_key = match.group(2) if match else None
+            if line_key in pending:
+                output.append(f"{line_key}={_quote_env(pending.pop(line_key))}")
+            elif line_key in requested_keys:
                 continue
             else:
                 output.append(line)
 
         if pending and output and output[-1].strip():
             output.append("")
-        output.extend(f"{key}={_quote_env(value)}" for key, value in pending.items())
+        output.extend(
+            f"{pending_key}={_quote_env(value)}"
+            for pending_key, value in pending.items()
+        )
         content = "\n".join(output).rstrip() + "\n"
 
         descriptor, temporary_name = tempfile.mkstemp(
