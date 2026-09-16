@@ -33,7 +33,7 @@ class PersonalAgentTests(unittest.TestCase):
         self.agent = PersonalAgent(
             self.database,
             start_scheduler=False,
-            notifier=self.notifier,
+            notifier=self.notifier,  # type: ignore[arg-type]
         )
 
     def tearDown(self) -> None:
