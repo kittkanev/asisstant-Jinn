@@ -4,6 +4,7 @@ import json
 import sys
 import unittest
 from types import SimpleNamespace
+from typing import Any
 from unittest.mock import Mock, patch
 
 from conversation import ConversationService, _NoProviderRedirects
@@ -252,8 +253,13 @@ class ConversationServiceTests(unittest.TestCase):
         ]
         sent: list[list[dict[str, str]]] = []
 
-        def reply(_settings, messages, *, allow_local_apps=False):
-            sent.append(messages)
+        def reply(
+            _settings: dict[str, Any],
+            messages: list[dict[str, Any]],
+            *,
+            allow_local_apps: bool = False,
+        ) -> tuple[str, list[dict[str, str]]]:
+            sent.append(messages)  # type: ignore[arg-type]
             return "answer", []
 
         with (

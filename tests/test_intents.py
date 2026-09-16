@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 from types import SimpleNamespace
+from typing import Any
 
 from github_service.intents import IntentParser
 
@@ -9,7 +10,7 @@ from github_service.intents import IntentParser
 class FakeCompletions:
     def __init__(self, content: str):
         self.content = content
-        self.calls = []
+        self.calls: list[dict[str, Any]] = []
 
     def create(self, **kwargs):
         self.calls.append(kwargs)
