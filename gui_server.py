@@ -48,7 +48,7 @@ class AssistantController:
             language=Config.VOICE_LANGUAGE,
         )
         self._personal.set_language(Config.VOICE_LANGUAGE)
-        self._search = SafeWebSearch(timeout=min(Config.AI_REQUEST_TIMEOUT, 15))
+        self._search = SafeWebSearch(timeout=min(Config.AI_REQUEST_TIMEOUT, 15.0))
         self._conversation = conversation or ConversationService(
             self._execute_model_tool
         )
@@ -86,6 +86,8 @@ class AssistantController:
             if set(arguments) != {"query"}:
                 raise ValueError("Инструмент поиска принимает только поле query.")
             query = arguments.get("query")
+            if not isinstance(query, str):
+                raise TypeError("Поле query должно быть строкой.")
             results = self._search.search(
                 query, max_results=Config.WEB_SEARCH_MAX_RESULTS
             )
@@ -317,7 +319,7 @@ class AssistantController:
 
         Config.save(values)
         self._personal.set_language(Config.VOICE_LANGUAGE)
-        self._search = SafeWebSearch(timeout=min(Config.AI_REQUEST_TIMEOUT, 15))
+        self._search = SafeWebSearch(timeout=min(Config.AI_REQUEST_TIMEOUT, 15.0))
         self.disconnect()
         self._conversation.clear()
         return self.status()
