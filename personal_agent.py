@@ -583,7 +583,7 @@ class AppLauncher:
                 if program_files_x86 is not None
                 else None,
             )
-            candidates = {
+            candidates_win: dict[str, tuple[Path, ...]] = {
                 "vscode": tuple(path for path in vscode_paths if path is not None),
                 "telegram": (
                     (roaming / "Telegram Desktop" / "Telegram.exe",)
@@ -601,8 +601,8 @@ class AppLauncher:
                     else ()
                 ),
             }
-            executable = self._first_existing(candidates.get(alias, ()))
-            return [executable] if executable else None
+            executable_path = self._first_existing(candidates_win.get(alias, ()))
+            return [executable_path] if executable_path else None
         if system == "Darwin":
             applications = {
                 "files": ("Finder", Path("/System/Library/CoreServices/Finder.app")),
@@ -627,7 +627,7 @@ class AppLauncher:
                 return None
             return ["open", "-a", definition[0]]
 
-        candidates = {
+        candidates: dict[str, tuple[str, ...]] = {
             "files": ("xdg-open",),
             "terminal": ("x-terminal-emulator", "gnome-terminal", "konsole", "xterm"),
             "calculator": ("gnome-calculator", "kcalc", "galculator"),
@@ -636,7 +636,8 @@ class AppLauncher:
             "telegram": ("telegram-desktop", "telegram"),
             "discord": ("discord",),
         }
-        command = self._first_available(candidates.get(alias, ()))
+        command_tuple = candidates.get(alias)
+        command = self._first_available(command_tuple) if command_tuple is not None else None
         if not command:
             return None
         return [command, home] if alias == "files" else [command]
@@ -1400,14 +1401,14 @@ class PersonalAgent:
             }
 
         identifier = re.search(r"#?(\d+)\s*$", lowered)
-        if identifier and any(word in lowered for word in pack["complete"]):
+        if identifier is not None and any(word in lowered for word in pack["complete"]):
             item_id = int(identifier.group(1))
             self.store.complete_item(item_id)
             return {
                 "intent": {"action": "complete_item", "item_id": item_id},
                 "response": pack["complete_done"].format(id=item_id),
             }
-        if identifier and any(word in lowered for word in pack["delete"]):
+        if identifier is not None and any(word in lowered for word in pack["delete"]):
             item_id = int(identifier.group(1))
             self.store.delete_item(item_id)
             return {
@@ -1475,13 +1476,15 @@ class PersonalAgent:
                     "Укажите длительность таймера, например «на 10 минут»."
                 )
             seconds, duration_fragment = parsed_duration
+            timer_match = re.search(
+                r"(?:поставь|установи|запусти|создай)?\s*таймер",
+                original,
+                re.IGNORECASE,
+            )
+            timer_text = timer_match.group(0) if timer_match is not None else "таймер"
             label = self._strip_command_parts(
                 original,
-                re.search(
-                    r"(?:поставь|установи|запусти|создай)?\s*таймер",
-                    original,
-                    re.IGNORECASE,
-                ).group(0),
+                timer_text,
                 duration_fragment,
             )
             label = re.sub(r"^(?:(?:на|для)\s+)+", "", label, flags=re.IGNORECASE)
