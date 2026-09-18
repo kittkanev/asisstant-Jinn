@@ -27,13 +27,14 @@ def run_gui(host: str, port: int, *, open_browser: bool = True) -> int:
         return 1
 
     actual_host, actual_port = server.server_address[:2]
+    host_str = actual_host.decode() if isinstance(actual_host, bytes) else str(actual_host)
     # This compares an already-bound address; it does not open a listener.
     browser_host = (
         "127.0.0.1"
-        if actual_host in {"0.0.0.0", "::"}  # noqa: S104 - comparison only.
-        else actual_host
+        if host_str in {"0.0.0.0", "::"}  # noqa: S104 - comparison only.
+        else host_str
     )
-    url = f"http://{browser_host}:{actual_port}"
+    url = f"http://{browser_host}:{str(actual_port)}"
     logger.info("Веб-интерфейс Джинна доступен по адресу %s", url)
     logger.info("Для остановки нажмите Ctrl+C")
     if open_browser:

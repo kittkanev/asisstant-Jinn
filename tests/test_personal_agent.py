@@ -33,7 +33,7 @@ class PersonalAgentTests(unittest.TestCase):
         self.agent = PersonalAgent(
             self.database,
             start_scheduler=False,
-            notifier=self.notifier,
+            notifier=self.notifier,  # type: ignore
         )
 
     def tearDown(self) -> None:
@@ -98,7 +98,7 @@ class PersonalAgentTests(unittest.TestCase):
         self.assertEqual(first[0]["item_id"], item["id"])
         self.assertEqual(self.notifier.messages, [("Таймер завершён", "Перерыв")])
 
-    def test_concurrent_due_collection_does_not_duplicate(self):
+    def test_concurrent_due_collection_does_not_duplicate(self) -> None:
         self.agent.store.create_item(
             "reminder",
             "Одно уведомление",
