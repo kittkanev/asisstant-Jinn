@@ -42,7 +42,7 @@ class GitHubClient:
 
         self.branch = branch
         self.repo_name = default_repo
-        self.g = github
+        self.g: Any = github
         if self.g is None:
             if Auth is None or Github is None:
                 raise RuntimeError("PyGithub is unavailable")
