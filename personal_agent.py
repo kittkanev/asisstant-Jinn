@@ -566,11 +566,13 @@ class AppLauncher:
                 "editor": windows / "System32" / "notepad.exe",
             }
             if alias in standard:
-                executable = standard[alias]
-                if not executable.is_file():
+                std_executable = standard[alias]
+                if not std_executable.is_file():
                     return None
                 return (
-                    [str(executable), home] if alias == "files" else [str(executable)]
+                    [str(std_executable), home]
+                    if alias == "files"
+                    else [str(std_executable)]
                 )
             vscode_paths = (
                 local / "Programs" / "Microsoft VS Code" / "Code.exe"
@@ -627,7 +629,7 @@ class AppLauncher:
                 return None
             return ["open", "-a", definition[0]]
 
-        candidates = {
+        posix_candidates = {
             "files": ("xdg-open",),
             "terminal": ("x-terminal-emulator", "gnome-terminal", "konsole", "xterm"),
             "calculator": ("gnome-calculator", "kcalc", "galculator"),
@@ -636,7 +638,7 @@ class AppLauncher:
             "telegram": ("telegram-desktop", "telegram"),
             "discord": ("discord",),
         }
-        command = self._first_available(candidates.get(alias, ()))
+        command = self._first_available(posix_candidates.get(alias, ()))
         if not command:
             return None
         return [command, home] if alias == "files" else [command]
@@ -1475,13 +1477,15 @@ class PersonalAgent:
                     "Укажите длительность таймера, например «на 10 минут»."
                 )
             seconds, duration_fragment = parsed_duration
+            timer_match = re.search(
+                r"(?:поставь|установи|запусти|создай)?\s*таймер",
+                original,
+                re.IGNORECASE,
+            )
+            timer_text = timer_match.group(0) if timer_match else "таймер"
             label = self._strip_command_parts(
                 original,
-                re.search(
-                    r"(?:поставь|установи|запусти|создай)?\s*таймер",
-                    original,
-                    re.IGNORECASE,
-                ).group(0),
+                timer_text,
                 duration_fragment,
             )
             label = re.sub(r"^(?:(?:на|для)\s+)+", "", label, flags=re.IGNORECASE)
