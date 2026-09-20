@@ -607,17 +607,20 @@ class Config:
         path = Path(env_path) if env_path is not None else cls.ENV_FILE
         path.parent.mkdir(parents=True, exist_ok=True)
         lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
-        pending = {key: str(value) for key, value in values.items()}
+        pending: dict[str, str | Any] = {
+            key: str(value) for key, value in values.items()
+        }
         requested_keys = set(pending)
         output: list[str] = []
 
         assignment = re.compile(r"^(\s*)(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=")
         for line in lines:
             match = assignment.match(line)
-            key = match.group(2) if match else None
-            if key in pending:
-                output.append(f"{key}={_quote_env(pending.pop(key))}")
-            elif key in requested_keys:
+            match_key = match.group(2) if match else None
+            if match_key in pending:
+                val = pending.pop(match_key)
+                output.append(f"{match_key}={_quote_env(str(val))}")
+            elif match_key in requested_keys:
                 continue
             else:
                 output.append(line)
