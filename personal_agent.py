@@ -601,8 +601,8 @@ class AppLauncher:
                     else ()
                 ),
             }
-            executable = self._first_existing(candidates.get(alias, ()))
-            return [executable] if executable else None
+            existing = self._first_existing(candidates.get(alias, ()))
+            return [str(existing)] if existing else None
         if system == "Darwin":
             applications = {
                 "files": ("Finder", Path("/System/Library/CoreServices/Finder.app")),
@@ -627,7 +627,7 @@ class AppLauncher:
                 return None
             return ["open", "-a", definition[0]]
 
-        candidates = {
+        posix_candidates = {
             "files": ("xdg-open",),
             "terminal": ("x-terminal-emulator", "gnome-terminal", "konsole", "xterm"),
             "calculator": ("gnome-calculator", "kcalc", "galculator"),
@@ -636,7 +636,7 @@ class AppLauncher:
             "telegram": ("telegram-desktop", "telegram"),
             "discord": ("discord",),
         }
-        command = self._first_available(candidates.get(alias, ()))
+        command = self._first_available(posix_candidates.get(alias, ()))
         if not command:
             return None
         return [command, home] if alias == "files" else [command]
@@ -1475,13 +1475,15 @@ class PersonalAgent:
                     "Укажите длительность таймера, например «на 10 минут»."
                 )
             seconds, duration_fragment = parsed_duration
+            match_verb = re.search(
+                r"(?:поставь|установи|запусти|создай)?\s*таймер",
+                original,
+                re.IGNORECASE,
+            )
+            verb_fragment = match_verb.group(0) if match_verb else "таймер"
             label = self._strip_command_parts(
                 original,
-                re.search(
-                    r"(?:поставь|установи|запусти|создай)?\s*таймер",
-                    original,
-                    re.IGNORECASE,
-                ).group(0),
+                verb_fragment,
                 duration_fragment,
             )
             label = re.sub(r"^(?:(?:на|для)\s+)+", "", label, flags=re.IGNORECASE)
