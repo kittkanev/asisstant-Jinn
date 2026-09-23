@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from conversation import ConversationService
 from pathlib import Path
 from unittest.mock import patch
 
@@ -9,8 +10,9 @@ from gui_server import AssistantController
 from personal_agent import PersonalAgent
 
 
-class FakeConversation:
+class FakeConversation(ConversationService):
     def __init__(self) -> None:
+        super().__init__(None)
         self.messages: list[str] = []
         self.languages: list[str] = []
         self.local_app_permissions: list[bool] = []
