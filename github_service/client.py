@@ -60,6 +60,8 @@ class GitHubClient:
         """Fetch up to five unread notifications from all repositories."""
 
         notifications: list[dict[str, Any]] = []
+        if self.g is None:
+            raise RuntimeError("Github instance not initialized")
         items = self.g.get_user().get_notifications(all=False, participating=False)
         for notification in items:
             notifications.append(
