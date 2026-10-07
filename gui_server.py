@@ -86,6 +86,8 @@ class AssistantController:
             if set(arguments) != {"query"}:
                 raise ValueError("Инструмент поиска принимает только поле query.")
             query = arguments.get("query")
+            if not isinstance(query, str):
+                raise ValueError("Параметр query должен быть строкой.")
             results = self._search.search(
                 query, max_results=Config.WEB_SEARCH_MAX_RESULTS
             )
